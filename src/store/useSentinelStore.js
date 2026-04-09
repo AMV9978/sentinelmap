@@ -24,6 +24,9 @@ const useSentinelStore = create((set) => ({
 
   mapZoom: 2,
   setMapZoom: (mapZoom) => set({ mapZoom }),
+
+  visitorIP: null,
+  setVisitorIP: (visitorIP) => set({ visitorIP }),
 }))
 
 export default useSentinelStore

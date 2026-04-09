@@ -1,7 +1,6 @@
 import useSentinelStore from '../store/useSentinelStore'
 
 const IPGEO_KEY = import.meta.env.VITE_IPGEO_KEY
-const ABUSEIPDB_KEY = import.meta.env.VITE_ABUSEIPDB_KEY
 
 export async function lookupIP(query) {
   const { setResult, setLoading, setError, setMapCenter, setMapZoom } =
@@ -15,16 +14,12 @@ export async function lookupIP(query) {
       fetch(
         `https://api.ipgeolocation.io/ipgeo?apiKey=${IPGEO_KEY}&ip=${query}`
       ),
-      fetch(
-        `/abuseipdb/api/v2/check?ipAddress=${query}&maxAgeInDays=90&verbose`,
-        {
-          headers: {
-            Key: ABUSEIPDB_KEY,
-            Accept: 'application/json',
-          },
-        }
-      ),
+      // Task 1: call Vercel serverless proxy instead of AbuseIPDB directly
+      fetch(`/api/abusecheck?ipAddress=${query}&maxAgeInDays=90&verbose=true`),
     ])
+
+    if (!geoRes.ok) throw new Error(`IPGeo error: ${geoRes.status}`)
+    if (!abuseRes.ok) throw new Error(`AbuseIPDB proxy error: ${abuseRes.status}`)
 
     const geo = await geoRes.json()
     const abuse = await abuseRes.json()
@@ -76,15 +71,8 @@ export async function bulkLookup(ips) {
         fetch(
           `https://api.ipgeolocation.io/ipgeo?apiKey=${IPGEO_KEY}&ip=${ip.trim()}`
         ),
-        fetch(
-          `/abuseipdb/api/v2/check?ipAddress=${ip.trim()}&maxAgeInDays=90`,
-          {
-            headers: {
-              Key: ABUSEIPDB_KEY,
-              Accept: 'application/json',
-            },
-          }
-        ),
+        // Task 1: same proxy for bulk — no headers needed, key is server-side
+        fetch(`/api/abusecheck?ipAddress=${ip.trim()}&maxAgeInDays=90`),
       ])
 
       const geo = await geoRes.json()

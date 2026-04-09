@@ -1,13 +1,31 @@
+import { useEffect } from 'react'
 import MapView from './components/MapView'
 import SearchBar from './components/SearchBar'
 import InfoPanel from './components/InfoPanel'
 import ThreatPanel from './components/ThreatPanel'
 import BulkTable from './components/BulkTable'
 import useSentinelStore from './store/useSentinelStore'
+import { lookupIP } from './hooks/useIPLookup'
 import './App.css'
 
 export default function App() {
-  const { mode } = useSentinelStore()
+  const { mode, setVisitorIP } = useSentinelStore()
+
+  useEffect(() => {
+    async function detectVisitorIP() {
+      try {
+        const res = await fetch('https://api.ipify.org?format=json')
+        const data = await res.json()
+        if (data?.ip) {
+          setVisitorIP(data.ip)
+          await lookupIP(data.ip)
+        }
+      } catch (e) {
+        console.warn('Visitor IP detection failed:', e.message)
+      }
+    }
+    detectVisitorIP()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="app">
