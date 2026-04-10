@@ -14,13 +14,14 @@ function ScoreRing({ score }) {
   const radius = 40
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (score / 100) * circumference
-  const color = score >= 75 ? '#ef4444' : score >= 25 ? '#f59e0b' : '#22c55e'
+  const color =
+    score >= 75 ? '#ff4d4d' : score >= 25 ? '#f5a623' : '#22d47a'
 
   return (
     <div className="score-ring-wrapper">
       <svg width="100" height="100" viewBox="0 0 100 100">
         <circle cx="50" cy="50" r={radius} fill="none"
-          stroke="#333" strokeWidth="8" />
+          stroke="#1e2d40" strokeWidth="8" />
         <circle cx="50" cy="50" r={radius} fill="none"
           stroke={color} strokeWidth="8"
           strokeDasharray={circumference}
@@ -31,8 +32,8 @@ function ScoreRing({ score }) {
         />
         <text x="50" y="50" textAnchor="middle"
           dominantBaseline="central"
-          fill={color} fontSize="16" fontWeight="bold"
-          fontFamily="monospace">
+          fill={color} fontSize="16" fontWeight="600"
+          fontFamily="IBM Plex Mono, monospace">
           {score}%
         </text>
       </svg>
@@ -44,22 +45,26 @@ function ScoreRing({ score }) {
 export default function ThreatPanel() {
   const { result, loading } = useSentinelStore()
 
-  if (loading) return <div className="panel loading">Analyzing threat...</div>
+  if (loading) return <div className="panel loading">Analyzing threat intelligence...</div>
   if (!result) return null
 
   const uniqueCategories = [...new Set(result.abuseCategories)]
     .map((id) => ABUSE_CATEGORIES[id])
     .filter(Boolean)
 
-  const riskLevel =
+  const riskClass =
+    result.abuseScore >= 75 ? 'high'
+    : result.abuseScore >= 25 ? 'med'
+    : 'low'
+
+  const riskLabel =
     result.abuseScore >= 75 ? 'HIGH'
     : result.abuseScore >= 25 ? 'MEDIUM'
     : 'LOW'
 
-  const riskColor =
-    result.abuseScore >= 75 ? '#ef4444'
-    : result.abuseScore >= 25 ? '#f59e0b'
-    : '#22c55e'
+  const flagged = (val) => val
+    ? <span style={{ color: '#f5a623' }}>Yes</span>
+    : <span style={{ color: '#5a7080' }}>No</span>
 
   return (
     <div className="panel threat-panel">
@@ -70,8 +75,8 @@ export default function ThreatPanel() {
       <div className="threat-meta">
         <div className="threat-row">
           <span className="label">Risk Level</span>
-          <span className="value" style={{ color: riskColor, fontWeight: 'bold' }}>
-            {riskLevel}
+          <span className="value">
+            <span className={`risk-badge ${riskClass}`}>{riskLabel}</span>
           </span>
         </div>
         <div className="threat-row">
@@ -83,20 +88,20 @@ export default function ThreatPanel() {
           <span className="value">
             {result.lastReported
               ? new Date(result.lastReported).toLocaleDateString()
-              : 'Never'}
+              : <span style={{ color: '#5a7080' }}>Never</span>}
           </span>
         </div>
         <div className="threat-row">
           <span className="label">VPN</span>
-          <span className="value">{result.isVPN ? '⚠ Yes' : 'No'}</span>
+          <span className="value">{flagged(result.isVPN)}</span>
         </div>
         <div className="threat-row">
           <span className="label">Proxy</span>
-          <span className="value">{result.isProxy ? '⚠ Yes' : 'No'}</span>
+          <span className="value">{flagged(result.isProxy)}</span>
         </div>
         <div className="threat-row">
           <span className="label">Tor</span>
-          <span className="value">{result.isTor ? '⚠ Yes' : 'No'}</span>
+          <span className="value">{flagged(result.isTor)}</span>
         </div>
       </div>
 

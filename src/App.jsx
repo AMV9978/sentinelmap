@@ -31,12 +31,14 @@ export default function App() {
     <div className="app">
       <header className="header">
         <div className="logo">
-          <span className="logo-bracket">[</span>
-          SENTINEL
-          <span className="logo-accent">MAP</span>
-          <span className="logo-bracket">]</span>
+          <span className="logo-wordmark">Sentinel<span>Map</span></span>
+          <div className="logo-divider" />
+          <span className="tagline">IP Intelligence & Threat Analysis</span>
         </div>
-        <p className="tagline">IP Intelligence & Threat Analysis</p>
+        <div className="header-status">
+          <div className="status-dot" />
+          SYSTEMS OPERATIONAL
+        </div>
       </header>
 
       <div className="search-section">
